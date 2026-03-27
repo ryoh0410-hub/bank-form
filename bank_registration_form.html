@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>口座登録フォーム｜業務委託稼働者</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F26522;
+      --orange-dark: #d4561a;
+      --orange-light: #FFF0E8;
+      --orange-mid: #FDDBC8;
+      --ink: #1a1a1a;
+      --white: #ffffff;
+      --gray-light: #f7f7f7;
+      --gray-mid: #e0e0e0;
+      --gray-text: #666666;
+      --error: #e53935;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--gray-light);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    .topbar { background: var(--orange); height: 5px; }
+
+    .page-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-mid);
+      padding: 24px;
+      animation: slideDown 0.45s ease both;
+    }
+
+    .page-header-inner {
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .logo-block {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--orange);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 18px;
+    }
+
+    .logo-text { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--gray-text); }
+
+    .title-block h1 { font-size: 20px; font-weight: 700; }
+    .title-block p  { font-size: 12px; color: var(--gray-text); margin-top: 3px; }
+
+    .main { max-width: 700px; margin: 28px auto; padding: 0 16px; }
+
+    .notice {
+      background: var(--orange-light);
+      border: 1px solid var(--orange-mid);
+      border-left: 4px solid var(--orange);
+      padding: 14px 16px;
+      font-size: 12px; line-height: 1.8; color: #5a3010;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 24px;
+      animation: fadeUp 0.4s ease 0.1s both;
+    }
+    .notice strong { display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--orange-dark); margin-bottom: 5px; }
+
+    /* Setup notice */
+    .setup-notice {
+      background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px;
+      padding: 12px 16px; font-size: 12px; line-height: 1.7; color: #6d4c00;
+      margin-bottom: 16px; display: none;
+    }
+    .setup-notice.visible { display: block; }
+    .setup-notice code { background: #ffefc0; padding: 1px 4px; border-radius: 3px; font-family: 'DM Mono', monospace; }
+
+    /* Error banner */
+    .error-banner {
+      background: #ffeaea; border: 1px solid #ffb3b3; border-radius: 8px;
+      padding: 12px 16px; font-size: 12px; color: var(--error);
+      margin-bottom: 16px; display: none;
+    }
+    .error-banner.show { display: block; animation: fadeIn 0.3s ease; }
+
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: 10px;
+      border: 1px solid var(--gray-mid);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      overflow: hidden;
+      margin-bottom: 18px;
+      opacity: 0;
+      animation: fadeUp 0.45s ease forwards;
+    }
+    .card:nth-child(2) { animation-delay: 0.12s; }
+    .card:nth-child(3) { animation-delay: 0.22s; }
+    .card:nth-child(4) { animation-delay: 0.32s; }
+    .card:nth-child(5) { animation-delay: 0.42s; }
+
+    .card-header {
+      background: linear-gradient(135deg, var(--orange) 0%, #f5843a 100%);
+      padding: 13px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .card-num {
+      font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+      color: rgba(255,255,255,0.75); background: rgba(0,0,0,0.15);
+      width: 26px; height: 26px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    .card-title { font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.05em; }
+    .card-body { padding: 22px 20px; }
+
+    /* Fields */
+    .field-grid { display: grid; gap: 16px; }
+    .field-grid-2 { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 520px) { .field-grid-2 { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+
+    .field label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.07em; color: #444;
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    .req { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--orange); border: 1px solid var(--orange); padding: 1px 5px; border-radius: 3px; }
+    .opt { font-family: 'DM Mono', monospace; font-size: 9px; color: #aaa; border: 1px solid #ccc; padding: 1px 5px; border-radius: 3px; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 14px; color: var(--ink); background: var(--white);
+      border: 1.5px solid var(--gray-mid);
+      padding: 10px 12px; border-radius: 6px;
+      transition: all 0.18s ease; outline: none; width: 100%;
+    }
+    input:focus, select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(242,101,34,0.12);
+    }
+    input::placeholder { color: #bbb; font-size: 13px; }
+
+    select {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
+    }
+
+    .field-hint { font-size: 11px; color: #999; line-height: 1.5; }
+
+    .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+    .radio-option {
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+      font-size: 13px; padding: 8px 16px;
+      border: 1.5px solid var(--gray-mid); border-radius: 6px;
+      transition: all 0.15s ease; background: var(--white); user-select: none;
+    }
+    .radio-option:has(input:checked) {
+      background: var(--orange-light); border-color: var(--orange);
+      color: var(--orange-dark); font-weight: 700;
+    }
+    .radio-option input { display: none; }
+
+    /* Agreement */
+    .agreement-wrap {
+      background: var(--white); border: 1.5px solid var(--gray-mid); border-radius: 10px;
+      padding: 18px; margin-bottom: 22px;
+      opacity: 0; animation: fadeUp 0.45s ease 0.52s forwards;
+    }
+    .agreement { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+    .agreement input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; accent-color: var(--orange); cursor: pointer; margin-top: 2px; }
+    .agreement-text { font-size: 12px; line-height: 1.8; color: #555; }
+    .agreement-text a { color: var(--orange); text-decoration: underline; }
+
+    /* Submit */
+    .submit-area { text-align: center; opacity: 0; animation: fadeUp 0.45s ease 0.62s forwards; }
+
+    .btn-submit {
+      font-family: 'Noto Sans JP', sans-serif; font-size: 15px; font-weight: 700;
+      letter-spacing: 0.08em; color: #fff;
+      background: linear-gradient(135deg, var(--orange) 0%, #f5843a 100%);
+      border: none; padding: 16px 64px; border-radius: 8px; cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 14px rgba(242,101,34,0.4);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(242,101,34,0.45); }
+    .btn-submit:active { transform: translateY(1px); }
+    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .spinner {
+      display: none; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+    }
+    .btn-submit.loading .spinner { display: block; }
+    .btn-note { font-size: 11px; color: #aaa; margin-top: 12px; }
+
+    .footer {
+      max-width: 700px; margin: 40px auto 0; padding: 20px 16px 0;
+      border-top: 1px solid var(--gray-mid);
+      font-family: 'DM Mono', monospace; font-size: 10px; color: #bbb;
+      display: flex; justify-content: space-between;
+    }
+
+    /* Success overlay */
+    .success-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 100;
+      align-items: center; justify-content: center; backdrop-filter: blur(2px);
+    }
+    .success-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+
+    .success-card {
+      background: var(--white); padding: 48px 52px; text-align: center;
+      max-width: 380px; border-radius: 14px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+      animation: scaleIn 0.3s ease;
+    }
+    .success-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--orange), #f5843a);
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px; font-size: 30px; color: white;
+    }
+    .success-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+    .success-card p { font-size: 13px; color: var(--gray-text); line-height: 1.8; }
+    .success-close { margin-top: 24px; font-size: 12px; color: var(--orange); cursor: pointer; text-decoration: underline; }
+
+    @keyframes slideDown { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeUp { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="topbar"></div>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div class="logo-block">
+      <div class="logo-icon">🏦</div>
+      <div class="logo-text">業務委託管理システム</div>
+    </div>
+    <div class="title-block" style="text-align:right;">
+      <h1>口座登録フォーム</h1>
+      <p>報酬振込先口座の登録・変更</p>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div class="notice">
+    <strong>⚠ ご注意</strong>
+    ご登録いただいた口座情報は、業務委託報酬の振込にのみ使用します。入力内容に誤りがある場合、振込が遅延することがありますのでご確認ください。登録後の変更は所定の手続きが必要です。
+  </div>
+
+  <div class="setup-notice" id="setupNotice">
+    🔧 <strong>管理者設定：</strong> GASのWebアプリURLを <code>GAS_SCRIPT_URL</code> に設定してください。設定前はデモモードで動作します。
+  </div>
+
+  <div id="errorBanner" class="error-banner">
+    ⚠ 送信中にエラーが発生しました。ネットワーク接続をご確認のうえ、再度お試しください。
+  </div>
+
+  <form id="bankForm" novalidate>
+
+    <!-- 01 稼働者情報 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">01</div>
+        <div class="card-title">稼働者情報</div>
+      </div>
+      <div class="card-body">
+        <div class="field-grid field-grid-2">
+          <div class="field">
+            <label>氏名（漢字）<span class="req">必須</span></label>
+            <input type="text" name="name_kanji" placeholder="山田 太郎" required>
+          </div>
+          <div class="field">
+            <label>氏名（フリガナ）<span class="req">必須</span></label>
+            <input type="text" name="name_kana" placeholder="ヤマダ タロウ" required>
+          </div>
+          <div class="field">
+            <label>稼働者ID<span class="req">必須</span></label>
+            <input type="text" name="contractor_id" placeholder="CT-000000" required>
+          </div>
+          <div class="field">
+            <label>メールアドレス<span class="req">必須</span></label>
+            <input type="email" name="email" placeholder="example@mail.com" required>
+          </div>
+          <div class="field">
+            <label>電話番号<span class="opt">任意</span></label>
+            <input type="tel" name="phone" placeholder="090-0000-0000">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 金融機関情報 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">02</div>
+        <div class="card-title">金融機関情報</div>
+      </div>
+      <div class="card-body">
+        <div class="field-grid">
+          <div class="field">
+            <label>金融機関区分<span class="req">必須</span></label>
+            <div class="radio-group">
+              <label class="radio-option"><input type="radio" name="bank_type" value="銀行" checked>銀行</label>
+              <label class="radio-option"><input type="radio" name="bank_type" value="信用金庫">信用金庫</label>
+              <label class="radio-option"><input type="radio" name="bank_type" value="信用組合">信用組合</label>
+              <label class="radio-option"><input type="radio" name="bank_type" value="ゆうちょ銀行">ゆうちょ銀行</label>
+              <label class="radio-option"><input type="radio" name="bank_type" value="その他">その他</label>
+            </div>
+          </div>
+          <div class="field-grid field-grid-2">
+            <div class="field">
+              <label>金融機関名<span class="req">必須</span></label>
+              <input type="text" name="bank_name" placeholder="○○銀行" required>
+            </div>
+            <div class="field">
+              <label>金融機関コード<span class="opt">任意</span></label>
+              <input type="text" name="bank_code" placeholder="0000" maxlength="4">
+            </div>
+          </div>
+          <div class="field-grid field-grid-2">
+            <div class="field">
+              <label>支店名<span class="req">必須</span></label>
+              <input type="text" name="branch_name" placeholder="○○支店" required>
+            </div>
+            <div class="field">
+              <label>支店コード<span class="opt">任意</span></label>
+              <input type="text" name="branch_code" placeholder="000" maxlength="3">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 口座情報 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">03</div>
+        <div class="card-title">口座情報</div>
+      </div>
+      <div class="card-body">
+        <div class="field-grid">
+          <div class="field-grid field-grid-2">
+            <div class="field">
+              <label>口座種別<span class="req">必須</span></label>
+              <select name="account_type" required>
+                <option value="">選択してください</option>
+                <option value="普通">普通</option>
+                <option value="当座">当座</option>
+                <option value="貯蓄">貯蓄</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>口座番号<span class="req">必須</span></label>
+              <input type="text" name="account_number" placeholder="0000000" maxlength="8" required>
+            </div>
+          </div>
+          <div class="field-grid field-grid-2">
+            <div class="field">
+              <label>口座名義（漢字）<span class="req">必須</span></label>
+              <input type="text" name="account_name_kanji" placeholder="山田 太郎" required>
+            </div>
+            <div class="field">
+              <label>口座名義（カナ）<span class="req">必須</span></label>
+              <input type="text" name="account_name_kana" placeholder="ヤマダ タロウ" required>
+              <span class="field-hint">金融機関に登録されているカナ表記でご入力ください</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 登録区分 -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-num">04</div>
+        <div class="card-title">登録区分</div>
+      </div>
+      <div class="card-body">
+        <div class="field-grid">
+          <div class="field">
+            <label>申請種別<span class="req">必須</span></label>
+            <div class="radio-group">
+              <label class="radio-option"><input type="radio" name="request_type" value="新規" checked>新規登録</label>
+              <label class="radio-option"><input type="radio" name="request_type" value="変更">変更</label>
+            </div>
+          </div>
+          <div class="field">
+            <label>適用開始月<span class="req">必須</span></label>
+            <input type="text" name="start_month" placeholder="例：2025年4月" required>
+            <span class="field-hint">翌月15日締め切りまでにご登録ください</span>
+          </div>
+          <div class="field">
+            <label>備考<span class="opt">任意</span></label>
+            <input type="text" name="notes" placeholder="特記事項があればご記入ください">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Agreement -->
+    <div class="agreement-wrap">
+      <label class="agreement">
+        <input type="checkbox" id="agree" required>
+        <span class="agreement-text">
+          登録する口座情報が正確であることを確認しました。誤りによる振込遅延・誤振込について、弊社は責任を負いかねます。また、<a href="#">個人情報取扱方針</a>に同意のうえ送信します。
+        </span>
+      </label>
+    </div>
+
+    <!-- Submit -->
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span class="spinner"></span>
+        <span class="btn-label">口座情報を登録する</span>
+      </button>
+      <p class="btn-note">送信後、Googleスプレッドシートに自動記録されます</p>
+    </div>
+
+  </form>
+
+  <div class="footer">
+    <span>© 2025 業務委託管理システム</span>
+    <span>Ver. 2.0.0</span>
+  </div>
+</div>
+
+<!-- Success overlay -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">✓</div>
+    <h2>登録が完了しました</h2>
+    <p>口座情報の登録を受け付けました。<br>Googleスプレッドシートに記録されました。<br>内容に変更が生じた場合はお早めにご連絡ください。</p>
+    <div class="success-close" id="successClose">閉じる</div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // ★ GASのWebアプリURLをここに設定してください
+  // ============================================================
+  const GAS_SCRIPT_URL = '';
+  // ============================================================
+
+  if (!GAS_SCRIPT_URL) {
+    document.getElementById('setupNotice').classList.add('visible');
+  }
+
+  const form       = document.getElementById('bankForm');
+  const submitBtn  = document.getElementById('submitBtn');
+  const errorBanner = document.getElementById('errorBanner');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    if (!document.getElementById('agree').checked) {
+      alert('個人情報取扱方針への同意が必要です。');
+      return;
+    }
+    if (!this.checkValidity()) {
+      this.reportValidity();
+      return;
+    }
+
+    errorBanner.classList.remove('show');
+
+    const fd = new FormData(this);
+    const data = {
+      timestamp:           new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }),
+      name_kanji:          fd.get('name_kanji'),
+      name_kana:           fd.get('name_kana'),
+      contractor_id:       fd.get('contractor_id'),
+      email:               fd.get('email'),
+      phone:               fd.get('phone') || '',
+      bank_type:           fd.get('bank_type'),
+      bank_name:           fd.get('bank_name'),
+      bank_code:           fd.get('bank_code') || '',
+      branch_name:         fd.get('branch_name'),
+      branch_code:         fd.get('branch_code') || '',
+      account_type:        fd.get('account_type'),
+      account_number:      fd.get('account_number'),
+      account_name_kanji:  fd.get('account_name_kanji'),
+      account_name_kana:   fd.get('account_name_kana'),
+      request_type:        fd.get('request_type'),
+      start_month:         fd.get('start_month'),
+      notes:               fd.get('notes') || ''
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+
+    // GAS URL未設定 → デモモード
+    if (!GAS_SCRIPT_URL) {
+      console.log('[デモ] 送信データ:', data);
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        document.getElementById('successOverlay').classList.add('show');
+      }, 1200);
+      return;
+    }
+
+    // GASへ送信
+    try {
+      const params = new URLSearchParams(data);
+      await fetch(GAS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      });
+      // no-cors のため成功とみなす
+      document.getElementById('successOverlay').classList.add('show');
+      form.reset();
+    } catch (err) {
+      console.error(err);
+      errorBanner.classList.add('show');
+      errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+    }
+  });
+
+  document.getElementById('successClose').addEventListener('click', () => {
+    document.getElementById('successOverlay').classList.remove('show');
+  });
+
+  document.querySelector('[name="account_number"]').addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+  });
+  document.querySelector('[name="phone"]').addEventListener('input', function() {
+    this.value = this.value.replace(/[^\d-]/g, '');
+  });
+</script>
+</body>
+</html>
