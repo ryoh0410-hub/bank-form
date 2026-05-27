@@ -124,6 +124,41 @@
 
   footer { position:relative; z-index:5; text-align:center; padding:24px 20px 40px; font-size:.75rem; color:rgba(180,170,220,.4); letter-spacing:.08em; }
   footer strong { color:rgba(240,192,64,.5); }
+
+  .admin-button { position:fixed; bottom:20px; right:20px; z-index:50; width:48px; height:48px; border-radius:50%; background:rgba(155,111,255,.3); border:1.5px solid rgba(155,111,255,.6); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:all .3s; color:rgba(220,210,255,.7); box-shadow:0 4px 16px rgba(155,111,255,.2); }
+  .admin-button:hover { background:rgba(155,111,255,.5); border-color:var(--crystal); color:#fff; box-shadow:0 6px 24px rgba(155,111,255,.4); transform:scale(1.1); }
+  .admin-button:active { transform:scale(0.95); }
+
+  #adminModal { display:none; position:fixed; inset:0; z-index:200; background:rgba(6,9,24,.95); backdrop-filter:blur(8px); align-items:center; justify-content:center; }
+  #adminModal.active { display:flex; }
+  .admin-modal-content { background:var(--card-bg); border:1.5px solid var(--gold); border-radius:20px; padding:40px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto; position:relative; box-shadow:0 0 60px rgba(240,192,64,.3); }
+  .admin-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; }
+  .admin-modal-header h2 { font-family:'Cinzel Decorative',serif; color:var(--gold); font-size:1.6rem; }
+  .admin-close { background:none; border:none; color:var(--gold); font-size:1.8rem; cursor:pointer; padding:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; transition:color .2s; }
+  .admin-close:hover { color:var(--gold2); }
+
+  .admin-login { display:flex; flex-direction:column; gap:16px; }
+  .admin-input { background:rgba(255,255,255,.06); border:1px solid rgba(155,111,255,.4); border-radius:10px; padding:12px 16px; color:#fff; font-family:'Noto Sans JP',sans-serif; font-size:.9rem; }
+  .admin-input::placeholder { color:rgba(200,190,255,.4); }
+  .admin-submit { padding:12px; border:1.5px solid var(--gold); background:rgba(240,192,64,.15); color:var(--gold2); font-family:'Noto Sans JP',sans-serif; font-size:.9rem; font-weight:700; border-radius:10px; cursor:pointer; transition:all .25s; }
+  .admin-submit:hover { background:rgba(240,192,64,.3); box-shadow:0 0 20px rgba(240,192,64,.4); }
+  .admin-submit:active { transform:scale(.98); }
+
+  .admin-data { display:none; flex-direction:column; gap:16px; }
+  .admin-data.active { display:flex; }
+  .admin-stat { background:rgba(155,111,255,.08); border:1px solid rgba(155,111,255,.3); border-radius:12px; padding:16px; }
+  .admin-stat-title { font-weight:700; color:var(--gold2); margin-bottom:8px; }
+  .admin-stat-value { font-size:1.8rem; color:var(--cyan); font-weight:700; }
+  .admin-stat-label { font-size:.85rem; color:rgba(200,190,255,.6); margin-top:4px; }
+
+  .admin-games { display:flex; flex-direction:column; gap:12px; margin-top:24px; }
+  .admin-game-row { background:rgba(255,255,255,.04); border:1px solid rgba(155,111,255,.2); border-radius:10px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }
+  .admin-game-name { color:#fff; flex:1; }
+  .admin-game-count { font-weight:700; color:var(--gold); font-size:1.1rem; min-width:60px; text-align:right; }
+  .admin-game-pct { color:rgba(200,190,255,.6); font-size:.85rem; min-width:50px; text-align:right; }
+
+  .admin-error { background:rgba(232,64,64,.1); border:1px solid rgba(232,64,64,.4); border-radius:10px; padding:12px 16px; color:#ff9090; font-size:.85rem; text-align:center; display:none; }
+  .admin-error.show { display:block; }
 </style>
 </head>
 <body>
@@ -174,10 +209,42 @@
 
 <div class="grid" id="gameGrid"></div>
 
+<button class="admin-button" onclick="openAdminModal()">🔐</button>
+
+<div id="adminModal">
+  <div class="admin-modal-content">
+    <div class="admin-modal-header">
+      <h2>管理者パネル</h2>
+      <button class="admin-close" onclick="closeAdminModal()">✕</button>
+    </div>
+
+    <div id="adminLogin" class="admin-login">
+      <p style="color:rgba(200,190,255,.7); font-size:.9rem; margin-bottom:8px;">投票結果を確認するにはパスワードを入力してください</p>
+      <input type="password" class="admin-input" id="adminPassword" placeholder="パスワードを入力" />
+      <button class="admin-submit" onclick="checkAdminPassword()">ログイン</button>
+      <div class="admin-error" id="adminError"></div>
+    </div>
+
+    <div id="adminData" class="admin-data">
+      <div class="admin-stat">
+        <div class="admin-stat-title">総投票数</div>
+        <div class="admin-stat-value" id="totalVotes">0</div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div style="color:var(--gold2); font-weight:700; margin-bottom:12px;">ゲーム別投票数</div>
+        <div class="admin-games" id="adminGamesList"></div>
+      </div>
+
+      <button class="admin-submit" onclick="closeAdminModal()" style="margin-top:20px;">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <footer>🎮 AIゲーム月間イベント June 2026 &nbsp;|&nbsp; <strong>#AI工房6月</strong> &nbsp;|&nbsp; 開催: 6/1〜6/21 &nbsp;|&nbsp; 投票期限: 6/30 &nbsp;|&nbsp; 結果発表: 7/5</footer>
 
 <script>
-const GAS_URL = 'https://script.google.com/macros/d/{SCRIPT_ID}/usercontent';
+const ADMIN_PASSWORD = 'Aigametubotubo';
 
 const GAMES = [
   { id:1,  title:'ゲーム 1',  desc:'June brideをテーマにしたAIアドベンチャー。梅雨の世界を冒険しよう！' },
@@ -248,28 +315,13 @@ function render() {
   }
 }
 
-async function castVote(idx) {
+function castVote(idx) {
   if (userVote !== null) return;
 
   document.getElementById('sendingOverlay').classList.add('active');
   document.getElementById('errorMsg').style.display = 'none';
 
   try {
-    const body = JSON.stringify({
-      gameId:    GAMES[idx].id,
-      gameTitle: GAMES[idx].title,
-      votedAt:   new Date().toISOString(),
-    });
-
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body,
-    });
-
-    const json = await res.json();
-    if (json.status !== 'ok') throw new Error(json.message || '送信エラー');
-
     localCounts[idx]++;
     userVote = idx;
     localStorage.setItem(KEY_VOTED,  String(idx));
@@ -290,9 +342,73 @@ async function castVote(idx) {
     document.getElementById('sendingOverlay').classList.remove('active');
     document.getElementById('errorMsg').style.display = 'block';
     document.getElementById('errorText').textContent =
-      '⚠️ 送信に失敗しました。時間をおいて再度お試しください。\n(' + err.message + ')';
+      '⚠️ エラーが発生しました。\n(' + err.message + ')';
   }
 }
+
+function openAdminModal() {
+  document.getElementById('adminModal').classList.add('active');
+  document.getElementById('adminPassword').focus();
+}
+
+function closeAdminModal() {
+  document.getElementById('adminModal').classList.remove('active');
+  document.getElementById('adminLogin').style.display = 'flex';
+  document.getElementById('adminData').classList.remove('active');
+  document.getElementById('adminPassword').value = '';
+  document.getElementById('adminError').classList.remove('show');
+}
+
+function checkAdminPassword() {
+  const password = document.getElementById('adminPassword').value;
+  const errorEl = document.getElementById('adminError');
+
+  if (password === ADMIN_PASSWORD) {
+    document.getElementById('adminLogin').style.display = 'none';
+    document.getElementById('adminData').classList.add('active');
+    displayAdminData();
+  } else {
+    errorEl.textContent = '❌ パスワードが間違っています';
+    errorEl.classList.add('show');
+  }
+}
+
+function displayAdminData() {
+  const t = total();
+  document.getElementById('totalVotes').textContent = t;
+
+  const gamesList = document.getElementById('adminGamesList');
+  gamesList.innerHTML = '';
+
+  GAMES.forEach((g, i) => {
+    const count = localCounts[i];
+    const p = pct(i);
+
+    const row = document.createElement('div');
+    row.className = 'admin-game-row';
+    row.innerHTML = `
+      <div class="admin-game-name">${g.title}</div>
+      <div class="admin-game-count">${count}</div>
+      <div class="admin-game-pct">${p}%</div>
+    `;
+    gamesList.appendChild(row);
+  });
+}
+
+document.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter' && document.getElementById('adminModal').classList.contains('active')) {
+    const adminLogin = document.getElementById('adminLogin');
+    if (adminLogin.style.display !== 'none') {
+      checkAdminPassword();
+    }
+  }
+});
+
+document.getElementById('adminModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('adminModal')) {
+    closeAdminModal();
+  }
+});
 
 render();
 </script>
